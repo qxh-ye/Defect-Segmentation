@@ -34,5 +34,8 @@ class CrackDataset(Dataset):
         image = self.image_transform(image)
         mask = self.mask_transform(mask)
 
-        return image, mask
+        return {
+            "image": image,
+            "mask": mask
+        }
 
