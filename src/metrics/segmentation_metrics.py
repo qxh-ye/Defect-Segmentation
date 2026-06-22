@@ -12,3 +12,15 @@ def calculate_iou(logits, masks, threshold=0.5, eps=1e-6):
     iou = (intersection + eps) / (union + eps)
 
     return iou
+
+def calculate_dice(logits, masks, threshold=0.5, eps=1e-6):
+    probs = torch.sigmoid(logits)
+
+    preds = (probs > threshold).float()
+    masks = masks.float()
+
+    intersection = (preds * masks).sum()
+
+    dice = (2 * intersection + eps) / (preds.sum() + masks.sum() + eps)
+
+    return dice
