@@ -38,7 +38,7 @@ def predict():
     with torch.no_grad():
         logits = model(image_tensor)
         probs = torch.sigmoid(logits)
-        pred_mask = (probs > 0.5).float()
+        pred_mask = (probs > 0.4).float()
 
     pred_mask = pred_mask.squeeze().cpu().numpy()
     pred_mask = (pred_mask * 255).astype("uint8")
@@ -77,7 +77,7 @@ def predict():
             pred_mask
         ]
     )
-    comparison_save_path = "outputs/comparisons/comparison_CFD_014.png"
+    comparison_save_path = "outputs/comparisons/comparison_CFD_014_t04.png"
 
     os.makedirs("outputs/comparisons", exist_ok=True)
 

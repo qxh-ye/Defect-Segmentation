@@ -4,8 +4,9 @@ from torch.utils.data import DataLoader
 
 from src.datasets.crack_dataset import CrackDataset
 from src.models.unet import UNet
+from src.losses.dice_loss import DiceLoss
 
-def train_one_epoch(model, train_loader, criterion, optimizer, device, epoch, epochs, max_batches=None):
+def train_one_epoch(model, train_loader, bce_loss, dice_loss, optimizer, device, epoch, epochs, max_batches=None):
     model.train()
 
     total_loss = 0.0
@@ -16,7 +17,7 @@ def train_one_epoch(model, train_loader, criterion, optimizer, device, epoch, ep
         masks = batch["mask"].to(device)
 
         outputs = model(images)
-        loss = criterion(outputs, masks)
+        loss = bce_loss(outputs, masks) + dice_loss(outputs, masks)
 
         optimizer.zero_grad()
         loss.backward()
@@ -37,7 +38,7 @@ def train_one_epoch(model, train_loader, criterion, optimizer, device, epoch, ep
     avg_loss = total_loss / num_batches
     return avg_loss
 
-def validate(model, val_loader, criterion, device, max_batches=None):
+def validate(model, val_loader, bce_loss, dice_loss, device, max_batches=None):
     model.eval()
 
     total_loss = 0.0
@@ -49,12 +50,12 @@ def validate(model, val_loader, criterion, device, max_batches=None):
             masks = batch["mask"].to(device)
 
             outputs = model(images)
-            loss = criterion(outputs, masks)
+            loss = bce_loss(outputs, masks) + dice_loss(outputs, masks)
 
             total_loss += loss.item()
             num_batches += 1
 
-            if max_batches is not None and batch_idx >=  max_batches:
+            if max_batches is not None and batch_idx >= max_batches:
                 break
 
     avg_loss = total_loss / num_batches
@@ -93,7 +94,8 @@ def train():
     model = UNet(in_channels=3, num_classes=1)
     model = model.to(device)
 
-    criterion = nn.BCEWithLogitsLoss()
+    bce_loss = nn.BCEWithLogitsLoss()
+    dice_loss = DiceLoss()
 
     optimizer = torch.optim.Adam(
         model.parameters(),
@@ -109,19 +111,21 @@ def train():
         train_loss = train_one_epoch(
             model=model,
             train_loader=train_loader,
-            criterion=criterion,
+            bce_loss=bce_loss,
+            dice_loss=dice_loss,
             optimizer=optimizer,
             device=device,
             epoch=epoch,
             epochs=epochs,
-            max_batches=200
+            max_batches=300
         )
 
         val_loss = validate(
             model=model,
             val_loader=val_loader,
-            criterion=criterion,
-            device   =device,
+            bce_loss=bce_loss,
+            dice_loss=dice_loss,
+            device=device,
             max_batches=50
         )
 
