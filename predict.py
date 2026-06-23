@@ -11,8 +11,8 @@ def predict():
     print("Using device:", device)
 
     image_path = "data/crack_segmentation_dataset/test/images/CFD_014.jpg"
-    model_path = "outputs/best_unet_crack.pth"
-    save_path = "outputs/preds/pred_CFD_014.png"
+    model_path = "outputs/best_unet_crack_bce_dice.pth"
+    save_path = "outputs/preds/pred_CFD_014_bce_dice_final.png"
 
     model = UNet(in_channels=3, num_classes=1)
     model.load_state_dict(
@@ -38,7 +38,7 @@ def predict():
     with torch.no_grad():
         logits = model(image_tensor)
         probs = torch.sigmoid(logits)
-        pred_mask = (probs > 0.4).float()
+        pred_mask = (probs > 0.3).float()
 
     pred_mask = pred_mask.squeeze().cpu().numpy()
     pred_mask = (pred_mask * 255).astype("uint8")
@@ -77,7 +77,7 @@ def predict():
             pred_mask
         ]
     )
-    comparison_save_path = "outputs/comparisons/comparison_CFD_014_t04.png"
+    comparison_save_path = "outputs/comparisons/comparison_CFD_014_t03_bce_dice_final.png"
 
     os.makedirs("outputs/comparisons", exist_ok=True)
 

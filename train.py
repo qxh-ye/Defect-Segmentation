@@ -17,7 +17,9 @@ def train_one_epoch(model, train_loader, bce_loss, dice_loss, optimizer, device,
         masks = batch["mask"].to(device)
 
         outputs = model(images)
-        loss = bce_loss(outputs, masks) + dice_loss(outputs, masks)
+        bce = bce_loss(outputs, masks)
+        dice = dice_loss(outputs, masks)
+        loss = bce + dice
 
         optimizer.zero_grad()
         loss.backward()
@@ -30,6 +32,8 @@ def train_one_epoch(model, train_loader, bce_loss, dice_loss, optimizer, device,
             print(
                 f"Epoch [{epoch + 1}/{epochs}] "
                 f"Batch [{batch_idx}/{len(train_loader)}] "
+                f"BCE: {bce.item():.4f} "
+                f"Dice: {dice.item():.4f} "
                 f"Loss: {loss.item():.4f}"
             )
         if max_batches is not None and batch_idx >= max_batches:
@@ -102,8 +106,8 @@ def train():
         lr=1e-4
     )
 
-    epochs = 1
-    max_batches = 200
+    epochs = 5
+    max_batches = 20
 
     best_val_loss = float("inf")
 
@@ -117,7 +121,7 @@ def train():
             device=device,
             epoch=epoch,
             epochs=epochs,
-            max_batches=300
+            max_batches=None
         )
 
         val_loss = validate(
@@ -126,7 +130,7 @@ def train():
             bce_loss=bce_loss,
             dice_loss=dice_loss,
             device=device,
-            max_batches=50
+            max_batches=None
         )
 
         print(
@@ -135,13 +139,11 @@ def train():
             f"Val Loss: {val_loss:.4f}"
         )
 
+
         if val_loss < best_val_loss:
             best_val_loss = val_loss
-            torch.save(model.state_dict(), "outputs/best_unet_crack.pth")
+            torch.save(model.state_dict(), f"outputs/best_unet_crack_bce_dice.pth")
             print(f"Best model saved. Val Loss: {best_val_loss:.4f}")
-
-
-
 
 
 if __name__ == "__main__":
