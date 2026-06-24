@@ -21,14 +21,14 @@
 
 * 自定义 CrackDataset
 * U-Net 分割模型
-* BCE + DiceLoss 联合训练
-* GPU 训练
-* Validation 验证流程
-* Best Model 自动保存
-* IoU 与 Dice 评估
-* 推理可视化
-* 工程化目录结构
-* 支持后续 ONNX 部署扩展
+* BCEWithLogitsLoss + DiceLoss 联合优化
+* GPU训练与Best Model自动保存
+* IoU / Dice评估指标实现
+* 支持预测结果可视化
+* 支持 ONNX 模型导出
+* 支持 ONNXRuntime 推理部署
+* 实现 PyTorch 与 ONNX 输出一致性验证
+* 实现 PyTorch 与 ONNXRuntime 推理性能对比
 
 ## 技术栈
 
@@ -140,26 +140,66 @@ Best Model
 6. 推理可视化：预测阶段自动生成 Mask 与对比图，便于定位模型误检、漏检和边界分割问题。
 7. 工程化目录结构：按照 datasets、models、losses、metrics、utils 等模块组织代码，便于维护、扩展和部署集成。
 
+## ONNX部署
+
+项目支持将训练完成的 U-Net 模型导出为 ONNX 格式。
+
+导出流程：
+
+PyTorch Model
+↓
+torch.onnx.export()
+↓
+unet_crack.onnx
+
+随后使用 ONNXRuntime 进行推理部署。
+
+## ONNX一致性验证
+
+使用相同输入图片分别进行：
+
+- PyTorch推理
+- ONNXRuntime推理
+
+计算输出差异：
+
+Mean Abs Diff : 0.000345
+Max Abs Diff  : 0.001747
+
+结果表明：
+
+ONNX模型与PyTorch模型输出基本一致。
+
+## 推理性能测试
+
+测试环境：
+
+- PyTorch：CUDA
+- ONNXRuntime：CPU
+
+结果：
+
+PyTorch Avg Inference Time : 28.415 ms
+
+ONNXRuntime Avg Inference Time : 320.922 ms
+
+说明：
+
+当前 ONNXRuntime 使用 CPUExecutionProvider，
+PyTorch 使用 CUDA，因此结果仅用于展示推理流程，
+后续可接入 CUDAExecutionProvider 或 TensorRT 进一步优化。
+
 ## 后续优化方向
 
-### 部署优化
+- Flask Web Demo部署
+- Docker部署
+- ONNX CUDA推理
+- TensorRT加速
+- U-Net++
+- DeepLabV3+
+- Attention U-Net
 
-* ONNX 导出
-* ONNXRuntime 推理
-* TensorRT 部署
 
-### 模型优化
-
-* 数据增强策略
-* Attention U-Net
-* U-Net++
-* DeepLabV3+
-
-### 工程优化
-
-* Flask Web Demo
-* Docker 部署
-* 
 ## 简历项目描述
 
 ### 简历版项目描述
