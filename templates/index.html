@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>工业裂缝缺陷智能分割系统</title>
+</head>
+<body>
+    <h1>工业裂缝缺陷智能分割系统</h1>
+    <form method="post" enctype="multipart/form-data">
+        <input type="file" name="image">
+        <button type="submit">上传图片</button>
+    </form>
+
+    {% if image_path %}
+        <h2>上传原图</h2>
+        <img src="{{image_path}}" width="448">
+    {% endif %}
+
+    {% if mask_path %}
+        <h2>预测</h2>
+        <img src="{{mask_path}}" width="448">
+    {% endif %}
+</body>
+</html>

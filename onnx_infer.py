@@ -30,6 +30,32 @@ def postprocess(output, threshold=0.5):
 
     return pred_mask
 
+def infer_image(image_path, onnx_path="outputs/unet_crack.onnx", threshold=0.5):
+    """
+        对单张图片进行 ONNX 推理，返回原图和预测Mask
+        这个函数给 Flask 调用
+    """
+    original, image_tensor = preprocess(image_path)
+
+    session = ort.InferenceSession(
+        onnx_path,
+        providers=["CPUExecutionProvider"]
+    )
+
+    input_name = session.get_inputs()[0].name
+    output_name = session.get_outputs()[0].name
+
+    outputs = session.run(
+        [output_name],
+        {
+            input_name: image_tensor
+        }
+    )
+
+    pred_mask = postprocess(outputs[0], threshold=threshold)
+
+    return original, pred_mask
+
 def main():
     image_path = "data/crack_segmentation_dataset/test/images/CFD_014.jpg"
     mask_path = "data/crack_segmentation_dataset/test/masks/CFD_014.jpg"
