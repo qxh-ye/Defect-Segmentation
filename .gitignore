@@ -4,5 +4,6 @@ outputs/
 *.pt
 __pycache__/
 .idea/
-S
-static/
+
+static/uploads
+static/results
