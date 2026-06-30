@@ -2,6 +2,7 @@ import os
 import cv2
 import numpy as np
 import onnxruntime as ort
+from pathlib import Path
 
 def preprocess(image_path):
     image = cv2.imread(image_path)
@@ -30,7 +31,7 @@ def postprocess(output, threshold=0.5):
 
     return pred_mask
 
-def infer_image(image_path, onnx_path="outputs/unet_crack.onnx", threshold=0.5):
+def infer_image(image_path, ONNX_PATH= Path("outputs/onnxs/unet_crack.onnx"), threshold=0.5):
     """
         对单张图片进行 ONNX 推理，返回原图和预测Mask
         这个函数给 Flask 调用
@@ -38,7 +39,7 @@ def infer_image(image_path, onnx_path="outputs/unet_crack.onnx", threshold=0.5):
     original, image_tensor = preprocess(image_path)
 
     session = ort.InferenceSession(
-        onnx_path,
+        str(ONNX_PATH),
         providers=["CPUExecutionProvider"]
     )
 

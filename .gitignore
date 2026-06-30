@@ -4,3 +4,5 @@ outputs/
 *.pt
 __pycache__/
 .idea/
+S
+static/
