@@ -8,7 +8,6 @@ import torch
 
 from src.models.unet import UNet
 
-
 PYTORCH_MODEL_PATH = Path("outputs/best_unet_crack_bce_dice.pth")
 ONNX_MODEL_PATH = Path("outputs/onnxs/unet_crack.onnx")
 IMAGE_PATH = Path("data/crack_segmentation_dataset/test/images/CFD_014.jpg")
@@ -68,9 +67,11 @@ def benchmark_onnxruntime(input_array: np.ndarray) -> float:
     """使用 CPUExecutionProvider 测试 ONNXRuntime 平均推理耗时。"""
     session = ort.InferenceSession(
         str(ONNX_MODEL_PATH),
-        providers=["CPUExecutionProvider"],
+        providers=["CUDAExecutionProvider", "CPUExecutionProvider"],
     )
+    print("ONNXRuntime providers:", session.get_providers())
     input_name = session.get_inputs()[0].name
+    # output_name = session.get_outputs()[0].name
     model_input = {input_name: input_array}
 
     # 先执行固定次数预热，再进行正式计时。

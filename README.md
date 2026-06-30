@@ -154,40 +154,18 @@ unet_crack.onnx
 
 随后使用 ONNXRuntime 进行推理部署。
 
-## ONNX一致性验证
+## ONNXRuntime GPU Benchmark
 
-使用相同输入图片分别进行：
+本项目支持 ONNXRuntime CUDA 推理，并与 PyTorch CUDA 进行了推理耗时对比。
 
-- PyTorch推理
-- ONNXRuntime推理
+| Backend | Provider | Avg Inference Time |
+|---|---|---:|
+| PyTorch | CUDA | 28.187 ms |
+| ONNXRuntime | CUDAExecutionProvider | 27.646 ms |
 
-计算输出差异：
+Speedup: 1.020x
 
-Mean Abs Diff : 0.000345
-Max Abs Diff  : 0.001747
-
-结果表明：
-
-ONNX模型与PyTorch模型输出基本一致。
-
-## 推理性能测试
-
-测试环境：
-
-- PyTorch：CUDA
-- ONNXRuntime：CPU
-
-结果：
-
-PyTorch Avg Inference Time : 28.415 ms
-
-ONNXRuntime Avg Inference Time : 320.922 ms
-
-说明：
-
-当前 ONNXRuntime 使用 CPUExecutionProvider，
-PyTorch 使用 CUDA，因此结果仅用于展示推理流程，
-后续可接入 CUDAExecutionProvider 或 TensorRT 进一步优化。
+测试结果表明，ONNXRuntime GPU 推理结果与 PyTorch CUDA 基本持平，并略有提升。
 
 ## 后续优化方向
 
